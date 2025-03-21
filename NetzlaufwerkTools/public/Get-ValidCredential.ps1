@@ -16,7 +16,7 @@ function Get-ValidCredential {
     
         if (Test-Credentials -Credential $credentials) {
             if (!(Test-Path -Path $CrPath)) {
-                $credentials = Get-Credential
+                # $credentials = Get-Credential
                 $credentials | Export-Clixml $CrPath
                 Write-Log 'Neue Credentials wurden gespeichert'
             }
@@ -27,7 +27,6 @@ function Get-ValidCredential {
             $retryCount++
             if ($retryCount -lt $MaxRetries) {
                 Write-Log ('Neuer Versuch ({0} von {1})...' -f $retryCount, $MaxRetries)
-                $credentials = Get-Credential
             }
             else {
                 throw 'Maximale Anzahl an Fehlversuchen erreicht'

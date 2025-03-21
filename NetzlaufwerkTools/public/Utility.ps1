@@ -8,9 +8,17 @@ function Move-Log {
 
 function Write-Log {
     param (
-        [string]$msg
+        [string]$msg,
+        [ValidateSet('Info', 'Warning', 'Error', 'Debug')]
+        [string]$Level = 'Info'
     )
     $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+    switch ($Level) {
+        'Warning' { $msg = 'WARNING -' + $msg }
+        'Error' { $msg = 'ERROR -' + $msg }
+        'Debug' { $msg = 'DEBUG -' + $msg }
+        Default {}
+    }
     $logMsg = "$timestamp - $msg"
     if (!$Silent) { Write-Host $logMsg }
     Add-Content -Path $script:logFile -Value $logMsg

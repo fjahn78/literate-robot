@@ -22,13 +22,13 @@ function Connect-Drives {
         # Zunächst prüfen, ob der Share verfügbar ist
         $shareAvailable = Test-ShareAvailability -NetworkPath $root
         if (-not $shareAvailable) {
-            Write-Log "⚠️ Das Netzlaufwerk {0}: kann nicht verbunden werden, da das Share nicht erreichbar ist." -f $name
+            Write-Log ("⚠️ Das Netzlaufwerk {0}: kann nicht verbunden werden, da das Share nicht erreichbar ist." -f $name) -Level Warning
             continue
         }
 
         if ($ForceReconnect -or $DryRun) {
             Write-Log ("ForceReconnect oder DryRun aktiv - versuche {0}: zu trennen" -f $name)
-            if (-not $DryRun) { $drive | disconnect -Method $Method }
+            if (-not $DryRun) { $drive | Disconnect-Drives -Method $Method }
         }
 
         if ($DryRun) {
@@ -49,7 +49,7 @@ function Connect-Drives {
             $global:success++
         }
         catch {
-            Write-Log ("❌ Fehler beim Mapping von {0}: $_" -f $name)
+            Write-Log ("❌ Fehler beim Mapping von {0}: $_" -f $name) -Level Error
             $global:failed++
         }
     }

@@ -7,7 +7,7 @@ function Test-ShareAvailability {
         return $true
     }
     else {
-        Write-Log "❌ Share $NetworkPath ist nicht erreichbar."
+        Write-Log "❌ Share $NetworkPath ist nicht erreichbar." -Level Error
         return $false
     }
     
