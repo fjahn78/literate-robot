@@ -34,3 +34,6 @@ jobs:
       with:
         name: code-coverage-report
         path: coverage.xml
+        
+    - name: Coveralls
+      uses: coverallsapp/github-action@v2
