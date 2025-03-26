@@ -9,7 +9,11 @@ function Connect-Drives {
         [Parameter(Mandatory = $true)]
         [ValidateSet('NetUse', 'PSDrive')]
         [string]
-        $Method
+        $Method,
+        [switch]
+        $ForceReconnect = $false,
+        [switch]
+        $DryRun = $false
     )
 
     begin { 
@@ -17,9 +21,10 @@ function Connect-Drives {
         $global:failed = 0
     }
     end {
+        $summary = @()
         foreach ($drive in $Drives) {
             # Zunächst prüfen, ob der Share verfügbar ist
-            $shareAvailable = Test-ShareAvailability -NetworkPath $root
+            $shareAvailable = Test-ShareAvailability -NetworkPath $drive.Root
             if (-not $shareAvailable) {
                 Write-Log ('⚠️ Das Netzlaufwerk {0}: kann nicht verbunden werden, da das Share nicht erreichbar ist.' -f $name) -Level Warning
                 $global:failed++
@@ -49,14 +54,13 @@ function Connect-Drives {
                     }
                     'NetUse' {
                         Write-Log ('Mapping {0}: -> {1} via net use' -f $name, $root)
-                        $result = Invoke-NetUse @drive
-                        
+                        $result = Invoke-NetUse @drive                        
                     }
                     Default { Write-Log "❌ Falsche Eingabe: Bitte wählen Sie zwischen 'PSDrive' und 'NetUse'" -Level Error }
                 }
                 if ($result) {
                     $global:success++
-                    return $result
+                    $summary += $result
                 }
             }
             catch {
@@ -64,5 +68,6 @@ function Connect-Drives {
                 $global:failed++
             }
         }
+        return $summary.Count
     }
 }
