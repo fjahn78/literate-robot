@@ -25,7 +25,7 @@ jobs:
         $config = New-PesterConfiguration
         $config.Run.Path = "./tests/Unit"
         $config.CodeCoverage.Enabled = $true
-        $config.CodeCoverage.Path = './NetzwerkTools/'
+        $config.CodeCoverage.Path = './NetzlaufwerkTools/'
         $config.TestResult.Enabled = $true
         Invoke-Pester -Configuration $config
 
