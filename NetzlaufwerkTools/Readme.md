@@ -1,5 +1,8 @@
 # NetzlaufwerkTools
 
+![Pester Tests](https://github.com/fjahn78/literate-robot/actions/workflows/test.yml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/fjahn78/literate-robot/badge.svg)](https://coveralls.io/github/fjahn78/literate-robot)
+
 **NetzlaufwerkTools** ist ein PowerShell-Modul, das das sichere Verbinden und Trennen von Netzlaufwerken erleichtert. Es unterstützt verschiedene Mapping-Methoden (z. B. PSDrive und net use), beinhaltet ein flexibles Logging, AD-Authentifizierung zur Validierung von Anmeldeinformationen und bietet Optionen wie ForceReconnect und DryRun.
 
 ## Inhaltsverzeichnis
