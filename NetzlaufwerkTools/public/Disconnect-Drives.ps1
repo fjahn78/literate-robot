@@ -4,39 +4,31 @@ function Disconnect-Drives {
         # hastable for splatting
         [Parameter(ValueFromPipeline = $true)]
         [hashtable]
-        $drive,
+        $Drive,
         # Method to use
         [Parameter(Mandatory = $true)]
         [string]
-        $Method
+        $Method,
+        [switch]
+        $DryRun
     )
     process {
-        $name = $drive['Name']
+        $name = $Drive['Name']
 
         if ($DryRun) {
             Write-Log ('[DryRun] Würde {0}: trennen via {1}' -f $name, $Method)
             return
         }
-
-        if ($Method -eq 'PSDrive') {
-            $mapped = Get-PSDrive -Name $name -ErrorAction SilentlyContinue
-            if ($mapped) {
+        switch ($Method) {
+            'PSDrive' {
                 Write-Log('Trenne PSDrive {0}:' -f $name)
-                Remove-PSDrive -Name $name -Force -Confirm:$False
+                $result = Invoke-PSDrive -Drive $Drive -Disconnect
             }
-            else {
-                Write-Log ('PSDrive {0}: nicht gefunden.' -f $name)
-            }
-        }
-        elseif ($Method -eq 'NetUse') {
-            $output = cmd /c "net use ${name}:"
-            if ($output -match '\\' -or $output -match 'OK') {
+            'NetUse' {
                 Write-Log ('Trenne net use Mapping {0}:' -f $name)
-                cmd /c "net use ${name}: /delete /y"
-            }
-            else {
-                Write-Log ('Kein aktives net use Mapping für {0}: gefunden' -f $name)
+                $result = Invoke-NetUse -Drive $Drive -Disconnect
             }
         }
+        return $result
     }
 }
