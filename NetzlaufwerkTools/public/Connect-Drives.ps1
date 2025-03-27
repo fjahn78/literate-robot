@@ -17,8 +17,8 @@ function Connect-Drives {
     )
 
     begin { 
-        $global:success = 0
-        $global:failed = 0
+        $Script:success = 0
+        $Script:failed = 0
     }
     end {
         $summary = @()
@@ -27,7 +27,7 @@ function Connect-Drives {
             $shareAvailable = Test-ShareAvailability -NetworkPath $drive.Root
             if (-not $shareAvailable) {
                 Write-Log ('⚠️ Das Netzlaufwerk {0}: kann nicht verbunden werden, da das Share nicht erreichbar ist.' -f $name) -Level Warning
-                $global:failed++
+                $failed++
                 continue
             }
 
@@ -41,33 +41,42 @@ function Connect-Drives {
                 continue
             }
 
-            if ($Credential) {
-                $drive.Add('Credential', $Credential)
-            }
+            # if ($Credential) {
+            #     $drive.Add('Credential', $Credential)
+            # }
 
             try {
                 switch ($Method) {
                     'PSDrive' { 
                         Write-Log ('Mapping {0}: -> {1} via PSDrive' -f $name, $root)
-                        $result = Invoke-PSDrive @drive 
-                        
+                        if ($Credential) {
+                            $result = Invoke-PSDrive -Drive $drive -Credential $Credential
+                        }
+                        else {
+                            $result = Invoke-PSDrive -Drive $drive
+                        }
                     }
                     'NetUse' {
                         Write-Log ('Mapping {0}: -> {1} via net use' -f $name, $root)
-                        $result = Invoke-NetUse @drive                        
+                        if ($Credential) {
+                            $result = Invoke-NetUse -Drive $drive -Credential $Credential
+                        }
+                        else {
+                            $result = Invoke-NetUse -Drive $drive
+                        }
                     }
-                    Default { Write-Log "❌ Falsche Eingabe: Bitte wählen Sie zwischen 'PSDrive' und 'NetUse'" -Level Error }
+                    Default { }
                 }
                 if ($result) {
-                    $global:success++
+                    $success++
                     $summary += $result
                 }
             }
             catch {
                 Write-Log ("❌ Fehler beim Mapping von {0}: $_" -f $name) -Level Error
-                $global:failed++
+                $failed++
             }
         }
-        return $summary.Count
+        return @{ success = $success; failed = $failed }
     }
 }
