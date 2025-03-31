@@ -1,8 +1,6 @@
 function Test-IsElevated {
-    $currentIdentity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
-    if (!$currentIdentity) {
-        return $false
-    }
-    $principal = [System.Security.Principal.WindowsPrincipal]::new($currentIdentity)
+    $identity = Get-CurrentIdentity
+    if (!$identity) { return $false }
+    $principal = Get-CurrentPrincipal -Identity $identity
     return $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
 }

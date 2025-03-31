@@ -11,11 +11,10 @@ InModuleScope -ModuleName NetzlaufwerkTools {
                 Mock Disconnect-Drives { }
                 Mock Invoke-PSDrive { return 'mocked' }
                 Mock Invoke-NetUse { return 'mocked' }
-                # Mock cmd { }
+                # sample credentials
+                $Credential = New-Object PSCredential('user', (ConvertTo-SecureString 'password' -AsPlainText -Force))
             }
             
-            # sample credentials
-            $Credential = New-Object PSCredential('user', (ConvertTo-SecureString 'password' -AsPlainText -Force))
             
             BeforeEach {
                 # sample test drive
@@ -23,6 +22,10 @@ InModuleScope -ModuleName NetzlaufwerkTools {
                     @{
                         'Name' = 'Z'
                         'Root' = '\\server\share'
+                    }   
+                    @{
+                        'Name' = 'Y'
+                        'Root' = '\\server\share2'
                     }
                 )
             }
@@ -33,7 +36,7 @@ InModuleScope -ModuleName NetzlaufwerkTools {
             ) {
                 $result = Connect-Drives -Drives $drives -Method $Method -DryRun
                 Assert-MockCalled -Scope It -CommandName "Invoke-$Method" -Exactly -Times 0
-                Assert-MockCalled -CommandName Write-Log -ModuleName NetzlaufwerkTools -Exactly 2
+                Assert-MockCalled -Scope It -CommandName 'Write-Log' 
                 $result.success | Should -Be 0
                 $result.failed | Should -Be 0
             }
@@ -43,7 +46,19 @@ InModuleScope -ModuleName NetzlaufwerkTools {
                 @{ Method = 'NetUse' }
             ) {
                 $result = Connect-Drives -Drives $drives -Credential $Credential -Method $Method
-                $result.success | Should -Be 1
+                $Credential | Should -Not -BeNullOrEmpty
+                Assert-MockCalled -Scope It -CommandName "Invoke-$Method" -Exactly $drives.Count
+                $result.success | Should -Be $drives.Count
+                $result.failed | Should -Be 0
+            }
+            It 'Should connect drives successfully via <method> with credentials when passed through a pipeline' -ForEach @(
+                @{ Method = 'PSDrive' }
+                @{ Method = 'NetUse' }
+            ) {
+                $result = $drives | Connect-Drives -Credential $Credential -Method $Method
+                $Credential | Should -Not -BeNullOrEmpty
+                Assert-MockCalled -Scope It -CommandName "Invoke-$Method" -Exactly $drives.Count
+                $result.success | Should -Be $drives.Count
                 $result.failed | Should -Be 0
             }
             It 'Should connect a drive successfully via <method> without credentials (same user)' -ForEach @(
@@ -51,7 +66,8 @@ InModuleScope -ModuleName NetzlaufwerkTools {
                 @{ Method = 'NetUse' }
             ) {
                 $result = Connect-Drives -Drives $drives -Method $Method
-                $result.success | Should -Be 1
+                Assert-MockCalled -Scope It -CommandName "Invoke-$Method" -Exactly $drives.Count
+                $result.success | Should -Be $drives.Count
                 $result.failed | Should -Be 0
             }
         
@@ -59,9 +75,11 @@ InModuleScope -ModuleName NetzlaufwerkTools {
                 @{ Method = 'PSDrive' }
                 @{ Method = 'NetUse' }
             ) {
-                Connect-Drives -Drives $drives -Method $Method -ForceReconnect
-                Assert-MockCalled -CommandName Disconnect-Drives -ModuleName NetzlaufwerkTools -Exactly 1
-            }
+                $result = Connect-Drives -Drives $drives -Method $Method -ForceReconnect
+                Assert-MockCalled -CommandName Disconnect-Drives -ModuleName NetzlaufwerkTools -Exactly $drives.Count
+                $result.success | Should -Be $drives.Count
+                $result.failed | Should -Be 0
+  }
         }
         Context 'Network Share Unavailable' {
             BeforeAll {
@@ -91,7 +109,7 @@ InModuleScope -ModuleName NetzlaufwerkTools {
                 @{ Method = 'PSDrive' }
                 @{ Method = 'NetUse' }
             ) {
-                $result = Connect-Drives -Drives $drives -Method $Method
+                $result = Connect-Drives -Drives $drives -Method $Method -Credential $Credential
                 Assert-MockCalled -Scope It -CommandName "Invoke-$Method" -Exactly 0
                 $result.success | Should -Be 0
                 $result.failed | Should -Be 1

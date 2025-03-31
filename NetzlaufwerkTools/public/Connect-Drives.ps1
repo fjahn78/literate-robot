@@ -1,8 +1,11 @@
 function Connect-Drives {
     param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [hashtable[]]
         $Drives,
+        [Parameter(ValueFromPipeline = $true)]
+        [hashtable]
+        $InputObject,
         [Parameter(Mandatory = $false)]
         [pscredential]
         $Credential,
@@ -19,6 +22,14 @@ function Connect-Drives {
     begin { 
         $Script:success = 0
         $Script:failed = 0
+        if (!$Drives) {
+            $Drives = @()
+        }
+    }
+    process {
+        if ($InputObject) {
+            $Drives += $InputObject
+        }
     }
     end {
         $summary = @()
@@ -41,9 +52,6 @@ function Connect-Drives {
                 continue
             }
 
-            # if ($Credential) {
-            #     $drive.Add('Credential', $Credential)
-            # }
 
             try {
                 switch ($Method) {
