@@ -16,7 +16,7 @@
 Installiere das Modul mit PowerShell:
 
 ```powershell
-Install-Module -Name Literate-Robot -Scope CurrentUser
+Install-Module -Name NetzlaufwerkTools -Scope CurrentUser
 ```
 
 ## Verwendung
@@ -70,7 +70,3 @@ Dieses Projekt verwendet [Pester](https://pester.dev/) für Unit-Tests. So führ
 4. Committe deine Änderungen (`git commit -am 'Add new feature'`).
 5. Push deine Änderungen (`git push origin feature-branch`).
 6. Erstelle einen Pull-Request.
-
-## Lizenz
-
-Dieses Projekt steht unter der MIT-Lizenz. Siehe die [LICENSE](LICENSE) für weitere Informationen.
