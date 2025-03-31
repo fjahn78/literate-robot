@@ -23,3 +23,12 @@ function Write-Log {
     if (!$Silent) { Write-Host $logMsg }
     Add-Content -Path $script:logFile -Value $logMsg
 }
+
+function Get-CurrentIdentity {
+    return [System.Security.Principal.WindowsIdentity]::GetCurrent()
+}
+
+function Get-CurrentPrincipal {
+    param ($Identity)
+    return [System.Security.Principal.WindowsPrincipal]::new($Identity)
+}
